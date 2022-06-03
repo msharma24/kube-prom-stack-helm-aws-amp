@@ -20,6 +20,18 @@ This project deploys the AWS Managed Prometheus (AMP) workspace and configures t
 2. `terraform init`
 3. `terraform plan`
 4. `terraform apply [-auto-approve]`
+5. This action will deploy the following resources:
+
+						-> AWS Managed Prometheus Workspace 
+
+						-> IAM Role 
+  
+						-> Creates a new namespace called Prometheus and deploys the Pods 
+						
+						- > Creates a service account with IAM Role annotation.
+
+6. AWS AMP Workspace on AWS Console
+![](https://raw.githubusercontent.com/msharma24/kube-prom-stack-helm-aws-amp/main/img/amp.png)
 5. Once the Terraform complete the deployment - check the pods created in the new `prometheus` namespace `kubectl get pods -n prometheus`
 ![](https://raw.githubusercontent.com/msharma24/kube-prom-stack-helm-aws-amp/main/img/get-pods.png)
 6. Once all the pods are running - access the Grafana instance by running port-forward command `kubectl -n prometheus port-forward _kube-prometheus-stack-grafana-<random_id>_ 3000`
