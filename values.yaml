@@ -1,0 +1,29 @@
+grafana:
+  sidecar:
+    datasources:
+      enabled: true
+      defaultDatasourceEnabled: false
+  serviceAccount:
+    create: false
+    name: iamproxy-service-account
+  grafana.ini:
+    auth:
+      sigv4_auth_enabled: true
+  additionalDataSources:
+    - name: prometheus-amp
+      editable: true
+      jsonData:
+        sigV4Auth: true
+        sigV4Region:
+      type: prometheus
+      isDefault: true
+      url:
+prometheus:
+  serviceAccount:
+    create: false
+    name:
+  prometheusSpec:
+    remoteWrite:
+      - 
+        sigv4:
+          region:
