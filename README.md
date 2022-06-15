@@ -36,7 +36,7 @@ This project deploys the AWS Managed Prometheus (AMP) workspace and configures t
 ![](https://raw.githubusercontent.com/msharma24/kube-prom-stack-helm-aws-amp/main/img/get-pods.png)
 6. Once all the pods are running - access the Grafana instance by running port-forward command `kubectl -n prometheus port-forward _kube-prometheus-stack-grafana-<random_id>_ 3000`
 ![](https://raw.githubusercontent.com/msharma24/kube-prom-stack-helm-aws-amp/main/img/k-port-forward.png)
-7. Access the Grafana Instance Locally `http://localhost:3000/ User: `admin` Password `prom-operator`
+7. Access the Grafana Instance Locally `http://localhost:3000/ User:  `admin`   Password    `prom-operator`
 8. Go to Data Sources  and click on `prometheus-amp` data source to validate if the AMP Data Source is working 
 ![](https://raw.githubusercontent.com/msharma24/kube-prom-stack-helm-aws-amp/main/img/datasource.png)
 And then scroll down and click `Save and Test` and it should respond with `Data Source is working `
