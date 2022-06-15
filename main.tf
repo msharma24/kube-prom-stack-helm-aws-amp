@@ -4,6 +4,14 @@
 locals {
   amp_id = aws_prometheus_workspace.amp_demo.id
 
+  vars = {
+
+    SNS_ARN    = module.pagerduty_sns["sns_topic_arn"]
+    AWS_REGION = var.region
+    CLIENT_URL = "http://ops.alert.com" ## link to be included in the alert in PD
+
+  }
+
 }
 resource "aws_prometheus_workspace" "amp_demo" {
 
@@ -14,7 +22,9 @@ resource "aws_prometheus_workspace" "amp_demo" {
 
 resource "aws_prometheus_alert_manager_definition" "alert_manager_definition" {
   workspace_id = aws_prometheus_workspace.amp_demo.id
-  definition   = file("${path.module}/prom-definition.yaml")
+  definition   = templatefile("${path.module}/prom-definition.yaml", local.vars)
+  #templatefile("${path.module}/policies/ci-deployment.json.tmpl", {
+  #  fn_arn = aws_s3_bucket.ci_deployment.arn
 }
 
 resource "aws_prometheus_rule_group_namespace" "alert_manager_rules" {

@@ -10,12 +10,12 @@ alertmanager_config: |
   receivers:
     - name: example-sns
       sns_configs:
-        - topic_arn: arn:aws:sns:us-west-2:378005625173:pagerduty-sns 
+        - topic_arn: ${SNS_ARN} 
           send_resolved: true
           sigv4:
-            region: us-west-2
+            region: ${AWS_REGION} 
           message: |
-            client_url: "https://ops.notifi.network"
+            client_url: ${CLIENT_URL} 
             severity: "error"
             description: "Alert description"
             details: {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}` # arbitrary dictionary
