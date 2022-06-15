@@ -12,6 +12,84 @@ resource "aws_prometheus_workspace" "amp_demo" {
 
 }
 
+resource "aws_prometheus_alert_manager_definition" "alert_manager_definition" {
+  workspace_id = aws_prometheus_workspace.amp_demo.id
+  definition   = file("${path.module}/prom-definition.yaml")
+}
+
+resource "aws_prometheus_rule_group_namespace" "alert_manager_rules" {
+  name         = "rules"
+  workspace_id = aws_prometheus_workspace.amp_demo.id
+  data         = file("${path.module}/prom-rules.yaml")
+}
+
+
+#----------------------------------------------------------------
+#  SNS Topic - PagerDuty
+#----------------------------------------------------------------
+module "pagerduty_sns" {
+  source  = "cloudposse/sns-topic/aws"
+  version = "0.20.1"
+
+  name                                   = "pagerduty-sns"
+  allowed_aws_services_for_sns_published = ["aps.amazonaws.com"]
+
+  subscribers = {
+    lambda = {
+      protocol               = "lambda"
+      endpoint               = module.pagerduty_lambda.arn
+      endpoint_auto_confirms = true
+      raw_message_delivery   = false
+    }
+  }
+
+}
+
+#----------------------------------------------------------------
+#  Lambda Function - PagerDuty
+#----------------------------------------------------------------
+resource "aws_ssm_parameter" "pd_ssm_parameter" {
+  name        = "/PAGER_DUTY/KEY"
+  description = "PagerDuty API Key"
+  type        = "SecureString"
+  value       = "find_me_in_aws_console"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+
+}
+
+module "pagerduty_lambda" {
+  source  = "cloudposse/lambda-function/aws"
+  version = "0.3.6"
+
+  function_name = "pagerduty"
+
+  handler  = "pagerduty.lambda_handler"
+  runtime  = "python3.8"
+  filename = "./pagerduty/pagerduty.zip"
+
+  lambda_environment = {
+    variables = {
+      "PAGER_DUTY_KEY" = "/PAGER_DUTY/KEY"
+    }
+  }
+
+
+
+}
+
+resource "aws_lambda_permission" "invoke_with_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = module.pagerduty_lambda.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = module.pagerduty_sns["sns_topic_arn"]
+}
+
+
+
 #--------------------------------------------------------------------------------------
 # Create namespace and serviceaccount with the TF Kubernetes provider
 #--------------------------------------------------------------------------------------
@@ -79,7 +157,9 @@ module "kube_prometheus_stack" {
         "aps:QueryMetrics",
         "aps:GetSeries",
         "aps:GetLabels",
-        "aps:GetMetricMetadata"
+        "aps:GetMetricMetadata",
+        "aps:ListRules",
+        "aps:ListAlerts"
       ]
       resources = ["*"]
     }

@@ -1,0 +1,29 @@
+--- 
+groups: 
+  - 
+    name: example
+    rules: 
+      - 
+        alert: DemoAlert
+        annotations: 
+          description: |-
+              A Prometheus job has disappeared
+               VALUE : {{ $value }}
+               LABELS : {{ $labels }}
+          summary: "Prometheus job missing (instance {{ $labels.instance }})"
+        expr: "up{job=\"node\"} == 0"
+        for: 1m
+        labels: 
+          severity: warning
+      - 
+        alert: DemoCPUAlert
+        annotations: 
+          description: |-
+              CPU load is < 85%
+                VALUE = {{ $value }}
+                LABELS = {{ $labels }}
+          summary: "Host high CPU load (instance {{ $labels.instance }})"
+        expr: "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[2m])) * 100) < 85"
+        for: 5m
+        labels: 
+          severity: warning
