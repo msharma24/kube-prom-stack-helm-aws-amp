@@ -2,8 +2,15 @@ import urllib3
 import json
 import yaml
 import os
+import boto3
 
-pager_duty_key = os.environ['PAGER_DUTY_KEY']
+SSM_PARAMETER_KEY = os.environ['PAGER_DUTY_KEY']
+print(f'Get the pagerduty key from SSM')
+client = boto3.client('ssm')
+pager_duty_key = client.get_parameter(
+        Name=SSM_PARAMETER_KEY,
+        WithDecryption=True)['Parameter']['Value']
+
 
 http = urllib3.PoolManager()
 def lambda_handler(event, context):
