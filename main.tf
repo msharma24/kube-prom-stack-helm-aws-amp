@@ -43,6 +43,7 @@ module "pagerduty_sns" {
 
   name                                   = "pagerduty-sns"
   allowed_aws_services_for_sns_published = ["aps.amazonaws.com"]
+  encryption_enabled                     = false
 
   subscribers = {
     lambda = {
@@ -79,6 +80,11 @@ module "pagerduty_lambda" {
   handler  = "pagerduty.lambda_handler"
   runtime  = "python3.8"
   filename = "./pagerduty/pagerduty.zip"
+
+  custom_iam_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+  ]
+
 
   lambda_environment = {
     variables = {
